@@ -73,7 +73,8 @@ export default function StepSection() {
           }}
         >
           {steps.map((step, index) => (
-            <Box key={step.number} sx={{ display: 'flex', alignItems: 'flex-start' }}>
+            <Box key={step.number} sx={{ display: 'contents' }}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
               {/* Step Card */}
               <Box
                 sx={{
@@ -158,7 +159,7 @@ export default function StepSection() {
                 </Box>
               </Box>
 
-              {/* Arrow between steps */}
+              {/* Arrow between steps - PC: right arrow */}
               {index < steps.length - 1 && (
                 <Box
                   sx={{
@@ -169,14 +170,38 @@ export default function StepSection() {
                     px: 1,
                   }}
                 >
-                  <Typography
+                  <Box
                     sx={{
-                      fontSize: '2rem',
-                      color: '#9ca3af',
+                      width: 0,
+                      height: 0,
+                      borderTop: '24px solid transparent',
+                      borderBottom: '24px solid transparent',
+                      borderLeft: '32px solid #4a5568',
                     }}
-                  >
-                    →
-                  </Typography>
+                  />
+                </Box>
+              )}
+            </Box>
+
+              {/* Arrow between steps - SP: down arrow */}
+              {index < steps.length - 1 && (
+                <Box
+                  sx={{
+                    display: { xs: 'flex', md: 'none' },
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    py: 1,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 0,
+                      height: 0,
+                      borderLeft: '20px solid transparent',
+                      borderRight: '20px solid transparent',
+                      borderTop: '28px solid #4a5568',
+                    }}
+                  />
                 </Box>
               )}
             </Box>
