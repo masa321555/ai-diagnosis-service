@@ -40,7 +40,7 @@ export default function Footer() {
             }}
           >
             <Link
-              href="#"
+              href="/privacy"
               underline="hover"
               sx={{
                 color: 'rgba(255, 255, 255, 0.7)',
@@ -53,7 +53,7 @@ export default function Footer() {
               プライバシーポリシー
             </Link>
             <Link
-              href="#"
+              href="/terms"
               underline="hover"
               sx={{
                 color: 'rgba(255, 255, 255, 0.7)',
