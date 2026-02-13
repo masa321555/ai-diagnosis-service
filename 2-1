@@ -1,0 +1,51 @@
+以下のタスクを実行したい。
+今日のフォルダのtasksの中にそのタスクの「タスク ID+タスクタイトル」の日本語名フォルダ作成して、その中にmdファイル作成してユーザーニーズと仕様要件と処理手順設計をわかりやすく書いて。
+その後に、その通りに実装して。
+＝＝＝＝＝
+###機能概要
+Google認証による会員制機能
+
+###機能詳細
+【認証】
+- NextAuth.jsを使用したGoogle OAuth認証
+- セッションベースのログイン状態管理
+- 認証ミドルウェアによる保護ルート
+
+【画面】
+- ログインページ（/auth/signin）
+  - Googleログインボタン
+  - ログイン後は/dashboardにリダイレクト
+- ダッシュボード（/dashboard）
+  - 会員専用トップページ
+  - ユーザー名・アバター表示
+  - ナビゲーションリンク
+- プロフィールページ（/profile）
+  - ユーザー情報表示（名前、メール、アバター）
+  - プロフィール編集フォーム
+  - 変更保存機能
+
+【API】
+- GET /api/auth/[...nextauth]：NextAuth.js認証エンドポイント
+- GET /api/user/profile：ユーザー情報取得
+- PUT /api/user/profile：プロフィール更新
+
+【ミドルウェア】
+- /dashboard, /profile は認証必須
+- 未ログインユーザーは/auth/signinにリダイレクト
+
+###データモデル
+User（NextAuth.jsデフォルト + 拡張）
+- _id: ObjectId
+- name: string
+- email: string
+- image: string（Googleアバター）
+- emailVerified: Date
+- createdAt: Date
+- updatedAt: Date
+
+###技術要件
+- NextAuth.js v5（Auth.js）使用
+- MongoDB Adapter使用
+- MUIのButton, Card, Avatar, TextField使用
+- セッションはJWT方式
+- 環境変数：GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET
