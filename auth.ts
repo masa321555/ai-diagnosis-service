@@ -16,15 +16,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session: updateData }) {
       if (user) {
         token.id = user.id;
+      }
+      // クライアントから update({ name }) が呼ばれた際にトークンを更新
+      if (trigger === 'update' && updateData?.name) {
+        token.name = updateData.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (token.id) {
         session.user.id = token.id as string;
+      }
+      if (token.name) {
+        session.user.name = token.name;
       }
       return session;
     },

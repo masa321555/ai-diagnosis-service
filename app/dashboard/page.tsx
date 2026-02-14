@@ -10,12 +10,16 @@ import {
   Container,
   Typography,
 } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   return (
     <Box
@@ -65,6 +69,30 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* キャリア診断ボタン */}
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={() => setSnackbarOpen(true)}
+          sx={{
+            mb: 3,
+            py: 2,
+            fontSize: '1.125rem',
+            fontWeight: 600,
+            borderRadius: '50px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            boxShadow: '0 4px 20px rgba(102, 126, 234, 0.4)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+              boxShadow: '0 8px 30px rgba(102, 126, 234, 0.5)',
+              transform: 'scale(1.02)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          キャリア診断を始める
+        </Button>
+
         {/* ナビゲーション */}
         <Card sx={{ mb: 3 }}>
           <CardContent sx={{ p: 0 }}>
@@ -97,6 +125,16 @@ export default function DashboardPage() {
         >
           ログアウト
         </Button>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}
+          onClose={() => setSnackbarOpen(false)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={() => setSnackbarOpen(false)} severity="info" sx={{ width: '100%' }}>
+            Coming Soon! 診断機能は近日公開予定です。
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
