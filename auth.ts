@@ -22,8 +22,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, trigger, session: updateData }) {
+      // サインイン時: ユーザー情報でトークンを全て更新
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
       }
       // クライアントから update({ name }) が呼ばれた際にトークンを更新
       if (trigger === 'update' && updateData?.name) {
@@ -37,6 +41,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       if (token.name) {
         session.user.name = token.name;
+      }
+      if (token.email) {
+        session.user.email = token.email;
+      }
+      if (token.picture) {
+        session.user.image = token.picture as string;
       }
       return session;
     },

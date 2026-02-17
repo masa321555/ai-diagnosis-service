@@ -120,3 +120,57 @@
 - Auth.js providers API (`/api/auth/providers`) で Google プロバイダーの登録を確認済み
 - Google OAuth の signinUrl: `/api/auth/signin/google`、callbackUrl: `/api/auth/callback/google` が正しく設定されている
 - ログイン後の動作確認（セクション2〜7, 9）は、ブラウザでの手動確認が必要です
+
+---
+
+## 10. アカウント切り替え問題の調査・修正（2026/02/15）
+
+### 報告された問題
+SONG MY（my.song.project0001@gmail.com）のGoogleアカウントを選択してログインしたにもかかわらず、ダッシュボードに「正相三井」（masaharu3210101@gmail.com）のユーザー情報が表示される。
+
+### 原因調査
+
+MongoDBの `accounts` コレクションを調査した結果、SONG MYのGoogleアカウント（`providerAccountId: 110297138187252712078`）が正相三井のユーザー（`userId: 698f347bc08815367a2a121b`）に誤ってリンクされていた。
+
+```
+// 誤ったリンク（accounts コレクション）
+{
+  userId: "698f347bc08815367a2a121b",         // ← 正相三井のユーザーID
+  provider: "google",
+  providerAccountId: "110297138187252712078"   // ← SONG MYのGoogle ID
+}
+```
+
+これにより、SONG MYでGoogleログインしても、MongoDBAdapter が正相三井のユーザーを返してしまい、JWTトークンに正相三井のユーザー情報がセットされていた。
+
+### 根本原因
+MongoDBAdapter のアカウントリンク機能により、過去のある時点でSONG MYのGoogleアカウントが正相三井のユーザーに紐づけられた。
+
+### 修正内容
+
+#### 1. データ修正（MongoDB）
+誤ってリンクされた `accounts` レコードを削除。次回SONG MYでログインすると、新しいユーザーとアカウントが自動作成される。
+
+```javascript
+db.collection('accounts').deleteOne({
+  providerAccountId: '110297138187252712078'
+});
+```
+
+#### 2. コード修正
+
+| ファイル | 修正内容 |
+|---------|---------|
+| `auth.ts` | Google Provider に `prompt: 'select_account'` を追加（毎回アカウント選択を表示） |
+| `auth.ts` | JWT コールバックでサインイン時に `name`, `email`, `image` の全情報をトークンに反映するよう修正 |
+| `auth.ts` | Session コールバックで `email`, `image` もトークンからセッションに反映するよう修正 |
+| `app/auth/signin/page.tsx` | 既存セッションがある場合、`signOut({ redirect: false })` でセッションを破棄してからGoogleログインを実行するよう修正 |
+
+### 修正後の確認項目
+
+| # | 確認項目 | 結果 | 備考 |
+|---|---------|------|------|
+| 10-1 | SONG MYアカウントでログイン → SONG MYの情報がダッシュボードに表示される | [-] | データ修正済み、要手動確認 |
+| 10-2 | 正相三井アカウントでログイン → 正相三井の情報がダッシュボードに表示される | [-] | 要手動確認 |
+| 10-3 | ログイン中に別アカウントでログインし直すとアカウントが切り替わる | [-] | signOut→signIn の実装済み、要手動確認 |
+| 10-4 | MongoDB の accounts コレクションに正しいリンクが作成される | [-] | 要手動確認（Atlas で確認） |

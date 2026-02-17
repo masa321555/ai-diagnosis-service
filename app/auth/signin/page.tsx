@@ -1,10 +1,20 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import { Box, Button, Card, CardContent, Typography } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 
 export default function SignInPage() {
+  const { data: session } = useSession();
+
+  const handleSignIn = async () => {
+    // 既存セッションがある場合は一度サインアウトしてからGoogleログイン
+    if (session) {
+      await signOut({ redirect: false });
+    }
+    signIn('google', { callbackUrl: '/dashboard' });
+  };
+
   return (
     <Box
       sx={{
@@ -46,7 +56,7 @@ export default function SignInPage() {
             variant="contained"
             size="large"
             startIcon={<GoogleIcon />}
-            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+            onClick={handleSignIn}
             sx={{
               width: '100%',
               py: 1.5,
