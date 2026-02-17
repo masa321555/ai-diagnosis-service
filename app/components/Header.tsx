@@ -12,25 +12,13 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Header() {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const handleCtaClick = () => {
-    setSnackbarOpen(true);
-    setDrawerOpen(false);
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
 
   return (
     <>
@@ -80,8 +68,9 @@ export default function Header() {
               新規登録/ログイン
             </Button>
             <Button
+              component={Link}
+              href="/diagnosis"
               variant="contained"
-              onClick={handleCtaClick}
               sx={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 color: '#ffffff',
@@ -148,7 +137,11 @@ export default function Header() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton onClick={handleCtaClick}>
+            <ListItemButton
+              component={Link}
+              href="/diagnosis"
+              onClick={() => setDrawerOpen(false)}
+            >
               <ListItemText
                 primary="無料診断を始める"
                 primaryTypographyProps={{
@@ -168,16 +161,6 @@ export default function Header() {
       {/* fixed ヘッダー分の余白 */}
       <Toolbar sx={{ minHeight: { xs: 56, md: 64 } }} />
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity="info" sx={{ width: '100%' }}>
-          Coming Soon! 診断機能は近日公開予定です。
-        </Alert>
-      </Snackbar>
     </>
   );
 }

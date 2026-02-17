@@ -10,16 +10,13 @@ import {
   Container,
   Typography,
 } from '@mui/material';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
+import HistoryIcon from '@mui/icons-material/History';
 import Link from 'next/link';
-import { useState } from 'react';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   return (
     <Box
@@ -71,11 +68,12 @@ export default function DashboardPage() {
 
         {/* キャリア診断ボタン */}
         <Button
+          component={Link}
+          href="/diagnosis"
           variant="contained"
           fullWidth
-          onClick={() => setSnackbarOpen(true)}
           sx={{
-            mb: 3,
+            mb: 2,
             py: 2,
             fontSize: '1.125rem',
             fontWeight: 600,
@@ -91,6 +89,22 @@ export default function DashboardPage() {
           }}
         >
           キャリア診断を始める
+        </Button>
+
+        {/* 診断履歴リンク */}
+        <Button
+          component={Link}
+          href="/diagnosis/history"
+          variant="text"
+          fullWidth
+          startIcon={<HistoryIcon />}
+          sx={{
+            mb: 3,
+            color: 'text.secondary',
+            fontSize: '0.875rem',
+          }}
+        >
+          診断履歴を見る
         </Button>
 
         {/* ナビゲーション */}
@@ -125,16 +139,6 @@ export default function DashboardPage() {
         >
           ログアウト
         </Button>
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert onClose={() => setSnackbarOpen(false)} severity="info" sx={{ width: '100%' }}>
-            Coming Soon! 診断機能は近日公開予定です。
-          </Alert>
-        </Snackbar>
       </Container>
     </Box>
   );

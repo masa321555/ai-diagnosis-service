@@ -1,0 +1,94 @@
+export type Question = {
+  id: string;
+  text: string;
+  type: 'single' | 'multiple' | 'text' | 'skill-level';
+  options?: string[];
+  placeholder?: string;
+  required?: boolean;
+};
+
+export const QUESTIONS: Question[] = [
+  {
+    id: 'q1',
+    text: '現在の職業・状況を教えてください',
+    type: 'single',
+    options: [
+      '学生（高校生・大学生）',
+      '新卒・第二新卒（社会人1〜3年目）',
+      '社会人（4年目以上）',
+      '転職活動中・離職中',
+      'フリーランス・副業中',
+    ],
+  },
+  {
+    id: 'q1_detail',
+    text: '現在の具体的な職種を教えてください',
+    type: 'text',
+    placeholder: '例：法人営業、経理、Webエンジニア、接客業、大学3年（経済学部）など',
+    required: true,
+  },
+  {
+    id: 'q2',
+    text: '興味のある分野を選んでください（複数選択可）',
+    type: 'multiple',
+    options: [
+      'AI・機械学習',
+      'Web開発・アプリ開発',
+      'データ分析・BI',
+      'デザイン・UI/UX',
+      'マーケティング・広告',
+      'プロジェクトマネジメント',
+      'コンサルティング',
+      '起業・スタートアップ',
+    ],
+  },
+  {
+    id: 'q3',
+    text: 'スキル・強みとそのレベルを教えてください',
+    type: 'skill-level',
+    options: [
+      '論理的思考・分析力',
+      'コミュニケーション力',
+      'クリエイティブ・発想力',
+      'リーダーシップ・マネジメント',
+      '技術力・プログラミング',
+      '文章力・ライティング',
+      '計画力・段取り力',
+      '語学力・国際感覚',
+    ],
+  },
+  {
+    id: 'q4',
+    text: 'キャリアで最も重視することは？',
+    type: 'single',
+    options: [
+      '高い収入・安定した待遇',
+      'スキルアップ・成長機会',
+      'ワークライフバランス',
+      '社会貢献・やりがい',
+      '自由な働き方・裁量の大きさ',
+    ],
+  },
+  {
+    id: 'q5',
+    text: '将来の働き方の希望は？',
+    type: 'single',
+    options: [
+      '大企業で安定したキャリアを築きたい',
+      'ベンチャー・スタートアップで挑戦したい',
+      'フリーランスとして自由に働きたい',
+      '自分で起業・事業を立ち上げたい',
+      'リモートワーク中心で働きたい',
+    ],
+  },
+  {
+    id: 'q6',
+    text: '今の仕事や状況について、一番不満なことや、やっていて一番楽しい瞬間を教えてください',
+    type: 'text',
+    placeholder: '例：ルーティンワークが多くて成長を感じられない / チームで新しい企画を立ち上げるときが一番ワクワクする',
+    required: false,
+  },
+];
+
+export const SKILL_LEVELS = ['実務経験あり', '勉強中', '興味あり'] as const;
+export type SkillLevel = (typeof SKILL_LEVELS)[number];
