@@ -8,6 +8,8 @@ import {
 } from '@mui/material';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import { QUESTIONS } from '@/app/diagnosis/_data/questions';
 
 type RecommendationObj = {
   jobTitle: string;
@@ -30,6 +32,7 @@ type DiagnosisData = {
       longTerm: string;
     };
   };
+  answers?: Record<string, string | string[] | Record<string, string>>;
   memo?: string;
   createdAt: string;
 };
@@ -251,6 +254,48 @@ export default function DiagnosisResultView({ data }: { data: DiagnosisData }) {
             <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
               {data.memo}
             </Typography>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 回答内容 */}
+      {data.answers && Object.keys(data.answers).length > 0 && (
+        <Card sx={{ mb: 3, bgcolor: '#fafafa' }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <QuestionAnswerIcon sx={{ color: '#667eea', fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={600}>
+                あなたの回答内容
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {QUESTIONS.map((q) => {
+                const answer = data.answers?.[q.id];
+                if (!answer) return null;
+
+                let displayAnswer: string;
+                if (q.type === 'skill-level' && typeof answer === 'object' && !Array.isArray(answer)) {
+                  displayAnswer = Object.entries(answer as Record<string, string>)
+                    .map(([skill, level]) => `${skill}：${level}`)
+                    .join('、');
+                } else if (Array.isArray(answer)) {
+                  displayAnswer = answer.join('、');
+                } else {
+                  displayAnswer = answer as string;
+                }
+
+                return (
+                  <Box key={q.id}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                      {q.text}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
+                      {displayAnswer}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
           </CardContent>
         </Card>
       )}
