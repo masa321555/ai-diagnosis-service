@@ -39,6 +39,31 @@ export async function POST(request: Request) {
     }
   }
 
+  // ユーザープロフィールから年齢・性別を取得
+  const db = client.db();
+  const user = await db.collection('users').findOne({ _id: session.user.id as unknown as import('mongodb').ObjectId });
+
+  let profileInfo = '';
+  if (user?.birthday) {
+    const birthDate = new Date(user.birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    profileInfo += `年齢: ${age}歳\n`;
+  }
+  if (user?.gender) {
+    const genderLabels: Record<string, string> = {
+      male: '男性',
+      female: '女性',
+      other: 'その他',
+      prefer_not_to_say: '回答なし',
+    };
+    profileInfo += `性別: ${genderLabels[user.gender] ?? user.gender}\n`;
+  }
+
   // プロンプト構築
   const answersText = QUESTIONS.map((q) => {
     const answer = answers[q.id];
@@ -61,6 +86,13 @@ export async function POST(request: Request) {
 - ユーザーの「現在のスキル（Can）」から「目標（Will）」に到達するための架け橋となる具体的な手段を提示してください。
 - ロードマップには具体的な学習リソース（Progate、Udemy講座名、Google認定資格など）やツール名を含めてください。
 - 「明日何をすべきか」がわかるレベルの具体性を持たせてください。
+- 現在の年収と希望年収のギャップを踏まえ、現実的な到達プランを提示してください。年収アップに必要なスキル・資格・経験を具体的に示してください。
+- おすすめ職種ごとに想定年収レンジを付記してください。
+- 転職の緊急度に応じてロードマップのペース配分を調整してください（「すぐに転職したい」なら短期に重点、「1〜2年かけて準備」なら中長期に重点）。
+- 各キャリアパスのリスク（市場の競争激化、スキル陳腐化、年齢要因など）と、そのリスクへの対策を含めてください。
+${profileInfo ? `- ユーザーの年齢・性別情報が提供されています。年齢に応じたキャリアステージ（第二新卒/若手/中堅/ベテラン等）を考慮し、年齢層に適した転職市場の現実やキャリア戦略を反映してください。性別に関しては、業界の多様性や働き方の選択肢に配慮した助言を行ってください。summaryの冒頭で「XX代のYY」のように年齢層を踏まえた分析であることを明示してください。` : ''}
+【ユーザーのプロフィール】
+${profileInfo || '（未登録）'}
 
 【ユーザーの回答】
 ${answersText}
@@ -72,7 +104,13 @@ ${answersText}
   "summary": "診断結果の概要。ユーザーの現在の状況と可能性を踏まえた分析（200〜300文字）",
   "strengths": ["現在のスキルや経験に基づく具体的な強み1", "強み2", "強み3"],
   "gapAnalysis": "Will（やりたいこと）とCan（できること）のギャップ分析。現実的なハードルとその乗り越え方（200〜300文字）",
-  "recommendations": ["具体的な職種名1", "具体的な職種名2", "具体的な職種名3", "具体的な職種名4"],
+  "recommendations": [
+    { "jobTitle": "具体的な職種名1", "salaryRange": "想定年収レンジ（例：500〜700万円）", "fit": "この職種がユーザーに合う理由（50〜100文字）" },
+    { "jobTitle": "具体的な職種名2", "salaryRange": "想定年収レンジ", "fit": "適合理由" },
+    { "jobTitle": "具体的な職種名3", "salaryRange": "想定年収レンジ", "fit": "適合理由" },
+    { "jobTitle": "具体的な職種名4", "salaryRange": "想定年収レンジ", "fit": "適合理由" }
+  ],
+  "riskAnalysis": "キャリアパスにおけるリスク（市場の競争、スキル陳腐化、年齢要因等）と、それぞれの具体的な対策・回避策（200〜300文字）",
   "roadmap": {
     "shortTerm": "短期プラン（0〜6ヶ月）：明日から始められる具体的なアクション。学習リソース名やツール名を含める",
     "midTerm": "中期プラン（6ヶ月〜2年）：具体的なスキル習得目標と資格・ポートフォリオの計画",
@@ -83,7 +121,7 @@ ${answersText}
   try {
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
+      max_tokens: 4096,
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -95,16 +133,23 @@ ${answersText}
       );
     }
 
-    // ```json ... ``` で囲まれている場合はJSONブロックを抽出
+    // JSONブロックを抽出（```json...```、閉じなし、または生JSONに対応）
     let jsonText = content.text.trim();
-    const jsonMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const jsonMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/);
     if (jsonMatch) {
       jsonText = jsonMatch[1].trim();
+    }
+    // それでもパースできない場合、最初の { から最後の } までを抽出
+    if (!jsonText.startsWith('{')) {
+      const start = jsonText.indexOf('{');
+      const end = jsonText.lastIndexOf('}');
+      if (start !== -1 && end !== -1) {
+        jsonText = jsonText.slice(start, end + 1);
+      }
     }
     const result = JSON.parse(jsonText);
 
     // MongoDBに保存
-    const db = client.db();
     const now = new Date();
     const doc = {
       userId: session.user.id,

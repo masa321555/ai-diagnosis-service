@@ -10,6 +10,11 @@ import {
   Card,
   CardContent,
   Container,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
   Snackbar,
   TextField,
   Typography,
@@ -20,6 +25,8 @@ import Link from 'next/link';
 export default function ProfilePage() {
   const { data: session, update } = useSession();
   const [name, setName] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [gender, setGender] = useState('');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{
     open: boolean;
@@ -33,13 +40,29 @@ export default function ProfilePage() {
     }
   }, [session?.user?.name]);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.birthday) setBirthday(data.birthday);
+          if (data.gender) setGender(data.gender);
+        }
+      } catch {
+        // プロフィール取得失敗は無視
+      }
+    };
+    if (session?.user) fetchProfile();
+  }, [session?.user]);
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, birthday: birthday || null, gender: gender || null }),
       });
 
       if (!res.ok) throw new Error('更新に失敗しました');
@@ -118,6 +141,30 @@ export default function ProfilePage() {
               fullWidth
               sx={{ mb: 3 }}
             />
+
+            <TextField
+              label="生年月日"
+              type="date"
+              value={birthday}
+              onChange={(e) => setBirthday(e.target.value)}
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ mb: 3 }}
+            />
+
+            <FormControl sx={{ mb: 3 }}>
+              <FormLabel>性別</FormLabel>
+              <RadioGroup
+                row
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <FormControlLabel value="male" control={<Radio />} label="男性" />
+                <FormControlLabel value="female" control={<Radio />} label="女性" />
+                <FormControlLabel value="other" control={<Radio />} label="その他" />
+                <FormControlLabel value="prefer_not_to_say" control={<Radio />} label="回答しない" />
+              </RadioGroup>
+            </FormControl>
 
             <Button
               variant="contained"

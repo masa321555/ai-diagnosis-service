@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import HomeIcon from '@mui/icons-material/Home';
 import Link from 'next/link';
 
 type DiagnosisSummary = {
@@ -185,6 +186,27 @@ export default function DiagnosisHistoryPage() {
               }}
             >
               新しい診断を始める
+            </Button>
+
+            <Button
+              component={Link}
+              href="/dashboard"
+              variant="outlined"
+              fullWidth
+              startIcon={<HomeIcon />}
+              sx={{
+                mt: 1.5,
+                py: 1.5,
+                borderColor: '#764ba2',
+                color: '#764ba2',
+                '&:hover': {
+                  borderColor: '#667eea',
+                  color: '#667eea',
+                  bgcolor: 'rgba(102, 126, 234, 0.04)',
+                },
+              }}
+            >
+              ダッシュボードに戻る
             </Button>
           </>
         )}

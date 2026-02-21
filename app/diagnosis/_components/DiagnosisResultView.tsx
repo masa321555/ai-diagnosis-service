@@ -4,10 +4,16 @@ import {
   Box,
   Card,
   CardContent,
-  Chip,
   Typography,
 } from '@mui/material';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+
+type RecommendationObj = {
+  jobTitle: string;
+  salaryRange: string;
+  fit: string;
+};
 
 type DiagnosisData = {
   result: {
@@ -16,7 +22,8 @@ type DiagnosisData = {
     summary: string;
     strengths: string[];
     gapAnalysis?: string;
-    recommendations: string[];
+    recommendations: string[] | RecommendationObj[];
+    riskAnalysis?: string;
     roadmap: {
       shortTerm: string;
       midTerm: string;
@@ -102,17 +109,21 @@ export default function DiagnosisResultView({ data }: { data: DiagnosisData }) {
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
             あなたの強み
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {result.strengths.map((s) => (
-              <Chip
+              <Box
                 key={s}
-                label={s}
                 sx={{
                   bgcolor: 'rgba(102, 126, 234, 0.1)',
-                  color: '#667eea',
-                  fontWeight: 500,
+                  borderRadius: 2,
+                  px: 2,
+                  py: 1.5,
                 }}
-              />
+              >
+                <Typography variant="body2" sx={{ color: '#667eea', fontWeight: 500, lineHeight: 1.6 }}>
+                  {s}
+                </Typography>
+              </Box>
             ))}
           </Box>
         </CardContent>
@@ -138,18 +149,61 @@ export default function DiagnosisResultView({ data }: { data: DiagnosisData }) {
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
             おすすめの職種
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {result.recommendations.map((r) => (
-              <Chip
-                key={r}
-                label={r}
-                variant="outlined"
-                sx={{ borderColor: '#764ba2', color: '#764ba2' }}
-              />
-            ))}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {result.recommendations.map((r, i) => {
+              const isObj = typeof r === 'object' && r !== null && 'jobTitle' in r;
+              return (
+                <Box
+                  key={isObj ? (r as RecommendationObj).jobTitle : (r as string)}
+                  sx={{
+                    border: '1px solid #764ba2',
+                    borderRadius: 2,
+                    px: 2,
+                    py: 1.5,
+                  }}
+                >
+                  {isObj ? (
+                    <>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                        <Typography variant="body2" sx={{ color: '#764ba2', fontWeight: 700 }}>
+                          {(r as RecommendationObj).jobTitle}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#667eea', fontWeight: 600, whiteSpace: 'nowrap', ml: 1 }}>
+                          {(r as RecommendationObj).salaryRange}
+                        </Typography>
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                        {(r as RecommendationObj).fit}
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: '#764ba2', fontWeight: 500, lineHeight: 1.6 }}>
+                      {r as string}
+                    </Typography>
+                  )}
+                </Box>
+              );
+            })}
           </Box>
         </CardContent>
       </Card>
+
+      {/* リスク分析 */}
+      {result.riskAnalysis && (
+        <Card sx={{ mb: 3, border: '1px solid', borderColor: 'rgba(255, 152, 0, 0.3)' }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <WarningAmberIcon sx={{ color: '#f57c00', fontSize: 20 }} />
+              <Typography variant="subtitle1" fontWeight={600}>
+                リスク分析と対策
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+              {result.riskAnalysis}
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ロードマップ */}
       <Card sx={{ mb: 3 }}>
