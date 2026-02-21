@@ -167,14 +167,12 @@ export default function DiagnosisResultView({ data }: { data: DiagnosisData }) {
                 >
                   {isObj ? (
                     <>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="body2" sx={{ color: '#764ba2', fontWeight: 700 }}>
-                          {(r as RecommendationObj).jobTitle}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#667eea', fontWeight: 600, whiteSpace: 'nowrap', ml: 1 }}>
-                          {(r as RecommendationObj).salaryRange}
-                        </Typography>
-                      </Box>
+                      <Typography variant="body2" sx={{ color: '#764ba2', fontWeight: 700, mb: 0.5 }}>
+                        {(r as RecommendationObj).jobTitle}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#667eea', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                        {(r as RecommendationObj).salaryRange}
+                      </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
                         {(r as RecommendationObj).fit}
                       </Typography>
