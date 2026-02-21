@@ -35,7 +35,7 @@ export default function HeroSection() {
             textShadow: '0 2px 10px rgba(0,0,0,0.1)',
           }}
         >
-          5問でわかる、
+          10問でわかる、
           <br />
           あなたのキャリア
         </Typography>

@@ -12,19 +12,19 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: '5問でわかる、あなたのキャリア | AIキャリア診断',
+  title: '10問でわかる、あなたのキャリア | AIキャリア診断',
   description:
-    'たった5問・3分で、AIがあなたに最適なキャリアロードマップを提案。就活・転職・キャリアに悩む方へ。登録不要・完全無料。',
+    'たった10問・3分で、AIがあなたに最適なキャリアロードマップを提案。就活・転職・キャリアに悩む方へ。登録不要・完全無料。',
   keywords: 'キャリア診断, AI診断, 適職診断, 就活, 転職, キャリアマップ',
   openGraph: {
-    title: '5問でわかる、あなたのキャリア',
+    title: '10問でわかる、あなたのキャリア',
     description: 'AIが3分であなただけのキャリアを診断',
     type: 'website',
     locale: 'ja_JP',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '5問でわかる、あなたのキャリア',
+    title: '10問でわかる、あなたのキャリア',
     description: 'AIが3分であなただけのキャリアを診断',
   },
 };
