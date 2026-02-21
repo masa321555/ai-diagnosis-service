@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import client from '@/lib/db';
+import { ObjectId } from 'mongodb';
 import Anthropic from '@anthropic-ai/sdk';
 import { QUESTIONS } from '@/app/diagnosis/_data/questions';
 
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
 
   // ユーザープロフィールから年齢・性別を取得
   const db = client.db();
-  const user = await db.collection('users').findOne({ _id: session.user.id as unknown as import('mongodb').ObjectId });
+  const user = await db.collection('users').findOne({ _id: new ObjectId(session.user.id) });
 
   let profileInfo = '';
   if (user?.birthday) {

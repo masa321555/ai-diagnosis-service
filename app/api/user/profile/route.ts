@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import client from '@/lib/db';
+import { ObjectId } from 'mongodb';
 
 export async function GET() {
   const session = await auth();
@@ -9,7 +10,7 @@ export async function GET() {
   }
 
   const db = client.db();
-  const user = await db.collection('users').findOne({ _id: session.user.id as unknown as import('mongodb').ObjectId });
+  const user = await db.collection('users').findOne({ _id: new ObjectId(session.user.id) });
 
   if (!user) {
     return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 });
@@ -49,7 +50,7 @@ export async function PUT(request: Request) {
   await db
     .collection('users')
     .updateOne(
-      { _id: session.user.id as unknown as import('mongodb').ObjectId },
+      { _id: new ObjectId(session.user.id) },
       { $set: updateFields }
     );
 
