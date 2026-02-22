@@ -99,30 +99,30 @@ ${profileInfo || '（未登録）'}
 ${answersText}
 
 以下のJSON形式のみで回答してください。JSON以外のテキスト、マークダウン記法（\`\`\`など）は絶対に含めないでください。
+【重要】各フィールドの文字数制限を厳守してください。jobTitleは20文字以内の簡潔な職種名にしてください。salaryRangeは「○○〜○○万円」の形式で15文字以内にしてください。
 {
-  "careerType": "キャリアタイプ名（例：テックイノベーター型、DXブリッジ人材型）",
-  "catchphrase": "職務経歴書やSNSプロフィールに使えるキャッチコピー（例：営業力×AI活用で企業のDXを加速させるブリッジ人材）",
-  "summary": "診断結果の概要。ユーザーの現在の状況と可能性を踏まえた分析（200〜300文字）",
-  "strengths": ["現在のスキルや経験に基づく具体的な強み1", "強み2", "強み3"],
-  "gapAnalysis": "Will（やりたいこと）とCan（できること）のギャップ分析。現実的なハードルとその乗り越え方（200〜300文字）",
+  "careerType": "キャリアタイプ名（10文字以内。例：テックイノベーター型）",
+  "catchphrase": "キャッチコピー（40文字以内）",
+  "summary": "診断結果の概要（200文字以内）",
+  "strengths": ["具体的な強み1（30文字以内）", "強み2", "強み3"],
+  "gapAnalysis": "Will×Canギャップ分析（200文字以内）",
   "recommendations": [
-    { "jobTitle": "具体的な職種名1", "salaryRange": "想定年収レンジ（例：500〜700万円）", "fit": "この職種がユーザーに合う理由（50〜100文字）" },
-    { "jobTitle": "具体的な職種名2", "salaryRange": "想定年収レンジ", "fit": "適合理由" },
-    { "jobTitle": "具体的な職種名3", "salaryRange": "想定年収レンジ", "fit": "適合理由" },
-    { "jobTitle": "具体的な職種名4", "salaryRange": "想定年収レンジ", "fit": "適合理由" }
+    { "jobTitle": "職種名（20文字以内）", "salaryRange": "○○〜○○万円", "fit": "適合理由（80文字以内）" },
+    { "jobTitle": "職種名", "salaryRange": "○○〜○○万円", "fit": "適合理由" },
+    { "jobTitle": "職種名", "salaryRange": "○○〜○○万円", "fit": "適合理由" }
   ],
-  "riskAnalysis": "キャリアパスにおけるリスク（市場の競争、スキル陳腐化、年齢要因等）と、それぞれの具体的な対策・回避策（200〜300文字）",
+  "riskAnalysis": "キャリアパスのリスクと対策（200文字以内）",
   "roadmap": {
-    "shortTerm": "短期プラン（0〜6ヶ月）：明日から始められる具体的なアクション。学習リソース名やツール名を含める",
-    "midTerm": "中期プラン（6ヶ月〜2年）：具体的なスキル習得目標と資格・ポートフォリオの計画",
-    "longTerm": "長期プラン（2年〜5年）：目標とするポジションと到達するための具体的なマイルストーン"
+    "shortTerm": "短期プラン0〜6ヶ月（150文字以内）",
+    "midTerm": "中期プラン6ヶ月〜2年（150文字以内）",
+    "longTerm": "長期プラン2〜5年（150文字以内）"
   }
 }`;
 
   try {
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -130,6 +130,15 @@ ${answersText}
     if (content.type !== 'text') {
       return NextResponse.json(
         { error: 'AI応答の解析に失敗しました' },
+        { status: 500 }
+      );
+    }
+
+    // トークン上限で途中切れした場合のチェック
+    if (message.stop_reason === 'max_tokens') {
+      console.error('診断エラー: AI応答がトークン上限で途中切れしました');
+      return NextResponse.json(
+        { error: 'AI応答が長すぎて途中で切れました。もう一度お試しください。' },
         { status: 500 }
       );
     }
