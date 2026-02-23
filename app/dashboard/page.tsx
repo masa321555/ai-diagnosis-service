@@ -13,6 +13,7 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HistoryIcon from '@mui/icons-material/History';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import Link from 'next/link';
 
 export default function DashboardPage() {
@@ -27,18 +28,42 @@ export default function DashboardPage() {
       }}
     >
       <Container maxWidth="sm">
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          sx={{
-            mb: 4,
-            background: 'linear-gradient(135deg, #667eea, #764ba2)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          ダッシュボード
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            ダッシュボード
+          </Typography>
+
+          {/* 管理画面リンク（adminのみ） */}
+          {session?.user?.role === 'admin' && (
+            <Button
+              component={Link}
+              href="/admin"
+              variant="outlined"
+              size="small"
+              startIcon={<AdminPanelSettingsIcon />}
+              sx={{
+                borderColor: '#667eea',
+                color: '#667eea',
+                fontWeight: 600,
+                fontSize: '0.75rem',
+                '&:hover': {
+                  borderColor: '#764ba2',
+                  backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                },
+              }}
+            >
+              管理画面
+            </Button>
+          )}
+        </Box>
 
         {/* ユーザー情報カード */}
         <Card sx={{ mb: 3 }}>
@@ -62,6 +87,22 @@ export default function DashboardPage() {
               <Typography variant="body2" color="text.secondary">
                 {session?.user?.email}
               </Typography>
+              <Button
+                component={Link}
+                href="/profile"
+                size="small"
+                startIcon={<PersonIcon sx={{ fontSize: '1rem' }} />}
+                sx={{
+                  mt: 0.5,
+                  p: 0,
+                  fontSize: '0.8rem',
+                  color: 'text.secondary',
+                  minWidth: 'auto',
+                  '&:hover': { backgroundColor: 'transparent', color: '#667eea' },
+                }}
+              >
+                プロフィール設定
+              </Button>
             </Box>
           </CardContent>
         </Card>
@@ -106,27 +147,6 @@ export default function DashboardPage() {
         >
           診断履歴を見る
         </Button>
-
-        {/* ナビゲーション */}
-        <Card sx={{ mb: 3 }}>
-          <CardContent sx={{ p: 0 }}>
-            <Button
-              component={Link}
-              href="/profile"
-              fullWidth
-              startIcon={<PersonIcon />}
-              sx={{
-                justifyContent: 'flex-start',
-                px: 3,
-                py: 2,
-                fontSize: '1rem',
-                color: 'text.primary',
-              }}
-            >
-              プロフィール設定
-            </Button>
-          </CardContent>
-        </Card>
 
         {/* ログアウト */}
         <Button

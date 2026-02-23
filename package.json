@@ -17,11 +17,14 @@
     "@mui/icons-material": "^6.0.0",
     "@mui/material": "^6.0.0",
     "@mui/material-nextjs": "^7.3.7",
+    "@mui/x-data-grid": "^8.27.1",
+    "@sentry/nextjs": "^10.39.0",
     "mongodb": "^6.21.0",
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
