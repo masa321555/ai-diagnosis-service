@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -19,6 +20,8 @@ import Link from 'next/link';
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
 
   return (
     <>
@@ -54,7 +57,7 @@ export default function Header() {
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
             <Button
               component={Link}
-              href="/auth/signin"
+              href={isLoggedIn ? '/dashboard' : '/auth/signin'}
               sx={{
                 color: '#1a1a2e',
                 fontWeight: 500,
@@ -65,7 +68,7 @@ export default function Header() {
                 },
               }}
             >
-              新規登録/ログイン
+              {isLoggedIn ? 'ダッシュボード' : '新規登録/ログイン'}
             </Button>
             <Button
               component={Link}
@@ -127,11 +130,11 @@ export default function Header() {
           <ListItem disablePadding>
             <ListItemButton
               component={Link}
-              href="/auth/signin"
+              href={isLoggedIn ? '/dashboard' : '/auth/signin'}
               onClick={() => setDrawerOpen(false)}
             >
               <ListItemText
-                primary="新規登録/ログイン"
+                primary={isLoggedIn ? 'ダッシュボード' : '新規登録/ログイン'}
                 primaryTypographyProps={{ fontWeight: 500 }}
               />
             </ListItemButton>
