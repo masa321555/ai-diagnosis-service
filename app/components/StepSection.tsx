@@ -8,8 +8,8 @@ const steps = [
   {
     number: 1,
     image: '/step-1.jpg',
-    title: '5つの質問に回答',
-    description: 'スマホで3分。直感的に\n答えるだけ。',
+    title: '10の質問に回答',
+    description: 'スマホで約3分。直感的に\n答えるだけ。',
   },
   {
     number: 2,

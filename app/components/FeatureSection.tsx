@@ -10,7 +10,7 @@ import CardContent from '@mui/material/CardContent';
 const features = [
   {
     image: '/feature-1.jpg',
-    title: '3分で、キャリアの「現在地」を可視化',
+    title: '約3分で、キャリアの「現在地」を可視化',
     description:
       '「何から始めればいいかわからない」をゼロに。独自のアルゴリズムが、あなたの経験とスキルを多角的に分析し、今のあなたが市場でどう評価されるかを数値化します。',
   },
@@ -52,7 +52,7 @@ export default function FeatureSection() {
             lineHeight: 1.6,
           }}
         >
-          たった3分で、忖度なしの客観的診断。
+          たった約3分で、忖度なしの客観的診断。
           <br />
           あなたの可能性をデータで広げる 最新AIのキャリア分析
         </Typography>
@@ -70,7 +70,7 @@ export default function FeatureSection() {
             lineHeight: 1.6,
           }}
         >
-          たった3分で、
+          たった約3分で、
           <br />
           忖度なしの客観的診断。
           <br />

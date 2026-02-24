@@ -64,7 +64,7 @@ export default function HeroSection() {
             opacity: 0.8,
           }}
         >
-          登録不要・3分で完了
+          無料・約3分で完了
         </Typography>
       </Container>
     </Box>

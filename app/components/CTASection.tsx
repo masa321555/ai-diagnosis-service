@@ -51,7 +51,7 @@ export default function CTASection() {
             opacity: 0.9,
           }}
         >
-          たった3分で、新しい可能性が見えてきます
+          たった約3分で、新しい可能性が見えてきます
         </Typography>
 
         <CTAButton variant="primary" />
