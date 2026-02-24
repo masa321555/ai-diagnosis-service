@@ -10,6 +10,14 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { QUESTIONS } from '@/app/diagnosis/_data/questions';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 type RecommendationObj = {
   jobTitle: string;
@@ -31,11 +39,57 @@ type DiagnosisData = {
       midTerm: string;
       longTerm: string;
     };
+    salaryProjection?: {
+      current: number;
+      shortTerm: number;
+      midTerm: number;
+      longTerm: number;
+    };
   };
   answers?: Record<string, string | string[] | Record<string, string>>;
   memo?: string;
   createdAt: string;
 };
+
+function parseRoadmapText(text: string): { heading?: string; steps: string[] } {
+  // 【...】部分を見出しとして抽出
+  const headingMatch = text.match(/【(.+?)】/);
+  const heading = headingMatch ? headingMatch[1] : undefined;
+
+  // 見出し部分を除去してステップ解析
+  const body = text.replace(/【.+?】\s*/, '');
+
+  // 丸数字（①②③...）で分割
+  const circledPattern = /[①②③④⑤⑥⑦⑧⑨⑩]/;
+  if (circledPattern.test(body)) {
+    const steps = body
+      .split(/[①②③④⑤⑥⑦⑧⑨⑩]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (steps.length > 0) return { heading, steps };
+  }
+
+  // 番号付きステップを分割（1. 2. 3. ...）
+  const stepPattern = /(?:^|\s)(\d+)\.\s+/;
+  if (stepPattern.test(body)) {
+    const steps = body
+      .split(/(?:^|\s)\d+\.\s+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (steps.length > 0) return { heading, steps };
+  }
+
+  // フォールバック: テキスト全体を1ステップとして返す
+  return { heading, steps: [body.trim()] };
+}
+
+const PHASE_CONFIG = [
+  { key: 'shortTerm' as const, label: '短期（0〜6ヶ月）', dot: '#43a047', bg: 'rgba(67,160,71,0.06)' },
+  { key: 'midTerm' as const, label: '中期（6ヶ月〜2年）', dot: '#1e88e5', bg: 'rgba(30,136,229,0.06)' },
+  { key: 'longTerm' as const, label: '長期（2年〜5年）', dot: '#8e24aa', bg: 'rgba(142,36,170,0.06)' },
+] as const;
+
+const STEP_CIRCLES = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
 
 export default function DiagnosisResultView({ data }: { data: DiagnosisData }) {
   const { result } = data;
@@ -206,41 +260,201 @@ export default function DiagnosisResultView({ data }: { data: DiagnosisData }) {
         </Card>
       )}
 
-      {/* ロードマップ */}
+      {/* ロードマップ（縦タイムライン） */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 3 }}>
             キャリアロードマップ
           </Typography>
 
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600} color="primary" sx={{ mb: 0.5 }}>
-              短期（0〜6ヶ月）
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-              {result.roadmap.shortTerm}
-            </Typography>
-          </Box>
+          <Box sx={{ position: 'relative', pl: 4 }}>
+            {PHASE_CONFIG.map((phase, phaseIdx) => {
+              const parsed = parseRoadmapText(result.roadmap[phase.key]);
+              const isLast = phaseIdx === PHASE_CONFIG.length - 1;
 
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" fontWeight={600} color="primary" sx={{ mb: 0.5 }}>
-              中期（6ヶ月〜2年）
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-              {result.roadmap.midTerm}
-            </Typography>
-          </Box>
+              return (
+                <Box key={phase.key} sx={{ position: 'relative', pb: isLast ? 0 : 4 }}>
+                  {/* 縦線 */}
+                  {!isLast && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        left: -20,
+                        top: 14,
+                        bottom: 0,
+                        width: 2,
+                        bgcolor: phase.dot,
+                        opacity: 0.3,
+                      }}
+                    />
+                  )}
 
-          <Box>
-            <Typography variant="body2" fontWeight={600} color="primary" sx={{ mb: 0.5 }}>
-              長期（2年〜5年）
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-              {result.roadmap.longTerm}
-            </Typography>
+                  {/* ドット */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      left: -26,
+                      top: 2,
+                      width: 14,
+                      height: 14,
+                      borderRadius: '50%',
+                      bgcolor: phase.dot,
+                      border: '3px solid white',
+                      boxShadow: `0 0 0 2px ${phase.dot}`,
+                    }}
+                  />
+
+                  {/* フェーズラベル */}
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    sx={{ color: phase.dot, mb: 1.5 }}
+                  >
+                    {phase.label}
+                  </Typography>
+
+                  {/* 見出し */}
+                  {parsed.heading && (
+                    <Typography
+                      variant="body2"
+                      fontWeight={600}
+                      sx={{ mb: 1, color: 'text.primary' }}
+                    >
+                      {parsed.heading}
+                    </Typography>
+                  )}
+
+                  {/* ステップカード */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {parsed.steps.map((step, stepIdx) => (
+                      <Box
+                        key={stepIdx}
+                        sx={{
+                          bgcolor: phase.bg,
+                          borderRadius: 2,
+                          px: 2,
+                          py: 1.5,
+                          borderLeft: `3px solid ${phase.dot}`,
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+                          <Box
+                            component="span"
+                            sx={{ color: phase.dot, fontWeight: 700, mr: 0.5 }}
+                          >
+                            {STEP_CIRCLES[stepIdx] || `${stepIdx + 1}.`}
+                          </Box>
+                          {step}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              );
+            })}
+
+            {/* ゴールマーカー */}
+            <Box sx={{ position: 'relative', pt: 3 }}>
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: -28,
+                  top: 14,
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ffd700, #ffaa00)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 10,
+                  boxShadow: '0 0 0 2px #ffd700',
+                }}
+              >
+                ⭐
+              </Box>
+              <Typography
+                variant="body2"
+                fontWeight={700}
+                sx={{ color: '#f9a825' }}
+              >
+                ゴール
+              </Typography>
+            </Box>
           </Box>
         </CardContent>
       </Card>
+
+      {/* 想定年収推移グラフ */}
+      {result.salaryProjection && (
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+              想定年収推移
+            </Typography>
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart
+                data={[
+                  { phase: '現在', salary: result.salaryProjection.current },
+                  { phase: '短期', salary: result.salaryProjection.shortTerm },
+                  { phase: '中期', salary: result.salaryProjection.midTerm },
+                  { phase: '長期', salary: result.salaryProjection.longTerm },
+                ]}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="salaryGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#667eea" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#764ba2" stopOpacity={0.05} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  dataKey="phase"
+                  tick={{ fontSize: 13, fill: '#666' }}
+                  axisLine={{ stroke: '#e0e0e0' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: '#999' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v: number) => `${v}万`}
+                  width={50}
+                />
+                <Tooltip
+                  formatter={(value) => [`${value}万円`, '想定年収']}
+                  contentStyle={{ borderRadius: 8, border: '1px solid #e0e0e0' }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="salary"
+                  stroke="#667eea"
+                  strokeWidth={3}
+                  fill="url(#salaryGradient)"
+                  dot={{ r: 5, fill: '#764ba2', stroke: '#fff', strokeWidth: 2 }}
+                  activeDot={{ r: 7, fill: '#667eea', stroke: '#fff', strokeWidth: 2 }}
+                  label={(props) => {
+                    const { x, y, value } = props as { x?: number; y?: number; value?: number };
+                    if (x == null || y == null || value == null) return null;
+                    return (
+                      <text
+                        x={x}
+                        y={y - 12}
+                        textAnchor="middle"
+                        fill="#764ba2"
+                        fontSize={12}
+                        fontWeight={600}
+                      >
+                        {value}万円
+                      </text>
+                    );
+                  }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
       {/* メモ */}
       {data.memo && (
