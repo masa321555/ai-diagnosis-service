@@ -30,16 +30,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.email = user.email;
         token.picture = user.image;
 
-        // MongoDBからロールを取得
+        // ロールを判定: ADMIN_EMAILS環境変数 or MongoDBのroleフィールド
+        const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+          .split(',')
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean);
+        const isEnvAdmin = !!user.email && adminEmails.includes(user.email.toLowerCase());
+
         try {
           const db = client.db();
           const dbUser = await db.collection('users').findOne(
             { _id: new ObjectId(user.id) },
             { projection: { role: 1 } }
           );
-          token.role = dbUser?.role ?? 'user';
+
+          if (isEnvAdmin && dbUser?.role !== 'admin') {
+            // 環境変数で指定されているがDBにまだ反映されていない場合、DBも更新
+            await db.collection('users').updateOne(
+              { _id: new ObjectId(user.id) },
+              { $set: { role: 'admin' } }
+            );
+            token.role = 'admin';
+          } else {
+            token.role = dbUser?.role ?? (isEnvAdmin ? 'admin' : 'user');
+          }
         } catch {
-          token.role = 'user';
+          token.role = isEnvAdmin ? 'admin' : 'user';
         }
       }
       // クライアントから update({ name }) が呼ばれた際にトークンを更新
